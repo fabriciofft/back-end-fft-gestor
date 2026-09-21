@@ -26,9 +26,7 @@ public class CodigoConfirmacaoService {
     private final Resend resend;
 
     @Autowired
-    public CodigoConfirmacaoService(
-            @Value("${resend.api-key}") String apiKey
-    ) {
+    public CodigoConfirmacaoService(@Value("${resend.api-key}") String apiKey) {
         this.resend = new Resend(apiKey);
     }
 
@@ -40,64 +38,47 @@ public class CodigoConfirmacaoService {
         LocalDateTime dataExpiracao = LocalDateTime.now().plusMinutes(10);
 
         if (codigoConfirmacaoRepository.findByEmail(email).isEmpty()) {
-
             codigoConfirmacao = new CodigoConfirmacaoModel(
-                    null,
-                    numeroAleatorio,
-                    email,
-                    dataExpiracao
+                null,
+                numeroAleatorio,
+                email,
+                dataExpiracao
             );
-
         } else {
-
-            codigoConfirmacao = codigoConfirmacaoRepository
-                    .findByEmail(email)
-                    .get();
+            codigoConfirmacao = codigoConfirmacaoRepository.findByEmail(email).get();
 
             codigoConfirmacao.setCodigoConfirmacao(numeroAleatorio);
             codigoConfirmacao.setDataExpiracao(dataExpiracao);
         }
 
         enviarEmailComCodigoDoUsuario(
-                email,
-                numeroAleatorio,
-                "Código de confirmação",
-                "cadastro"
+            email,
+            numeroAleatorio,
+            "Código de confirmação",
+            "cadastro"
         );
 
         return codigoConfirmacaoRepository.save(codigoConfirmacao);
     }
 
-    private Boolean enviarEmailComCodigoDoUsuario(
-            String email,
-            Integer codigo,
-            String cabecalho,
-            String acao
-    ) {
+    private Boolean enviarEmailComCodigoDoUsuario(String email, Integer codigo, String cabecalho, String acao) {
 
         String texto = "O seu código de " + acao + " é: " + codigo
-                + "\nEle expira em 10 minutos!";
+                     + "\nEle expira em 10 minutos!";
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("NFT Gestor <onboarding@resend.dev>")
-                .to(email)
-                .subject(cabecalho)
-                .text(texto)
-                .build();
+        .from("contato@fftflow.dev")
+        .to(email)
+        .subject(cabecalho)
+        .text(texto)
+        .build();
 
         try {
-
             resend.emails().send(params);
-
             return true;
-
         } catch (ResendException e) {
-
             e.printStackTrace();
-
-            throw new RequestException(
-                    "Erro ao enviar o código de confirmação para o email informado!"
-            );
+            throw new RequestException("Erro ao enviar o código de confirmação para o email informado!");
         }
     }
 }
