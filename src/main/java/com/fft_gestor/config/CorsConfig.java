@@ -12,8 +12,8 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
         .allowedOrigins(
             "http://localhost:5173",
-            "http://localhost:5174",
-            "https://fftflow.onrender.com/"
+            "https://fftflow.dev/",
+            "https://www.fftflow.dev/"
         )
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");
     }
