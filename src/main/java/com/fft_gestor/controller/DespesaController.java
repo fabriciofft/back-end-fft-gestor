@@ -31,6 +31,16 @@ public class DespesaController {
         return new ResponseEntity<>(despesaService.lancarDespesaDeUmUsuario(lancarDespesaRequestDTO), HttpStatus.CREATED);
     }
 
+    @PutMapping("/alterarStatusLancamentoDespesa/{codigo}")
+    public ResponseEntity<?> alterarStatusLancamentoDespesa(@PathVariable Long codigo){
+        return new ResponseEntity<>(despesaService.alterarStatusLancamentoDespesa(codigo), HttpStatus.OK);
+    }
+
+    @PutMapping("/tornarTodasDespesasPendentes/{codigo}")
+    public ResponseEntity<?> tornarTodasDespesasPendentes(@PathVariable Long codigo){
+        return new ResponseEntity<>(despesaService.tornarTodasDespesasPendentes(codigo), HttpStatus.OK);
+    }
+
     @DeleteMapping("/{codigo}")
     public ResponseEntity<?> excluirDepesaPorCodigo(@PathVariable Long codigo){
         return new ResponseEntity<>(despesaService.excluirDespesaPorCodigo(codigo), HttpStatus.OK);

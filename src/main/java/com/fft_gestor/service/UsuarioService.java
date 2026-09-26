@@ -80,7 +80,8 @@ public class UsuarioService {
             return new LoginResponseDTO(
                 usuario.getCodigo(),
                 usuario.getEmail(),
-                usuario.getNome()
+                usuario.getNome(),
+                usuario.getSaldoInicial()
             );
         }
         else{

@@ -53,13 +53,33 @@ public class DespesaService {
             null,
             salvarDespesaRequestDTO.getDescricao(),
             salvarDespesaRequestDTO.getDiaVencimento(),
-            salvarDespesaRequestDTO.getValor()
+            salvarDespesaRequestDTO.getValor(),
+            false
         );
 
         usuario.getDespesas().add(despesa);
         usuarioRepository.save(usuario);
 
         return despesaRepository.listarDespesasDeUmUsuario(usuario.getCodigo());
+    }
+
+    public DespesaModel alterarStatusLancamentoDespesa(Long codigo){
+        DespesaModel despesa = buscarDespesaPorCodigo(codigo);
+
+        despesa.setJaFoiLancadaEsseMes(!despesa.getJaFoiLancadaEsseMes());
+
+        return despesaRepository.save(despesa);
+    }
+
+    public List<DespesaModel> tornarTodasDespesasPendentes(Long codigoUsuario){
+        UsuarioModel usuario = buscarUsuarioPorCodigo(codigoUsuario);
+
+        for(DespesaModel despesa: usuario.getDespesas()){
+            despesa.setJaFoiLancadaEsseMes(false);
+        }
+
+        usuarioRepository.save(usuario);
+        return listarDespesasDeUmUsuario(codigoUsuario);
     }
 
     public List<DespesaModel> excluirDespesaPorCodigo(Long codigo){
@@ -98,6 +118,10 @@ public class DespesaService {
         );
 
         acaoService.adicionarAcaoEmUmDia(adicionarAcaoRequest);
+
+        despesa.setJaFoiLancadaEsseMes(true);
+        despesaRepository.save(despesa);
+
         return  "Lançaca com sucesso!";
     }
 

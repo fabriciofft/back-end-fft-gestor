@@ -23,4 +23,5 @@ public class DespesaModel {
     @Column(length = 2)
     private Integer diaVencimento;
     private Double valor;
+    private Boolean jaFoiLancadaEsseMes;
 }
