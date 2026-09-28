@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/compra")
 public class CompraController {
@@ -17,6 +19,11 @@ public class CompraController {
     @GetMapping(path = "/periodo/{codigoPeriodo}")
     public ResponseEntity<?> listarComprasDeUmPeriodo(@PathVariable Long codigoPeriodo){
         return new ResponseEntity<>(compraService.listarComprasDeUmPeriodo(codigoPeriodo), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/quitarCompras")
+    public ResponseEntity<?> quitarCompras(@RequestBody List<Long> codigosCompras){
+        return new ResponseEntity<>(compraService.quitarCompras(codigosCompras), HttpStatus.OK);
     }
 
     @PutMapping(path = "/quitar/{codigo}")

@@ -41,11 +41,35 @@ public class CompraService {
         return  periodo.getCompras();
     }
 
-    public List<CompraModel> quitarCompra(Long codigo){
+    public List<CompraModel> quitarCompras(List<Long> codigos){
+        if(codigos.isEmpty()){
+            throw new RequestException("Você precisa passar ao menos 1 código!");
+        }
+
+        Long primeiroCodigo = codigos.getFirst();
+        System.out.println(primeiroCodigo);
+        PeriodoModel periodo = buscarPeriodoPorCodigoDeCompra(primeiroCodigo);
+
+        for(Long codigo: codigos){
+            if(buscarCompraPorCodigo(codigo).getQuitado()){
+                throw new RequestException("Você só pode passar compras que ainda não foram quitadas!");
+            }
+            if(!periodo.getCodigo().equals(buscarPeriodoPorCodigoDeCompra(codigo).getCodigo())){
+                throw new RequestException("Você só pode passar compras do mesmo periodo!");
+            }
+        }
+
+        for(Long codigo: codigos){
+            quitarCompra(codigo);
+        }
+
+        return periodo.getCompras();
+    }
+
+    public CompraModel quitarCompra(Long codigo){
         DiaModel diaAtual = buscarDiaAtualPorData(LocalDate.now());
         CompraModel compra = buscarCompraPorCodigo(codigo);
         CartaoModel cartao = buscarCartaoPorCodigoDeCompra(compra.getCodigo());
-        PeriodoModel periodo = buscarPeriodoPorCodigoDeCompra(compra.getCodigo());
 
         if(compra.getQuitado()){
             throw new RequestException("Essa compra já foi quitada!");
@@ -66,10 +90,8 @@ public class CompraService {
         );
 
         acaoService.adicionarAcaoEmUmDia(adicionarAcaoRequestDTO);
-
         cartaoRepository.save(cartao);
-
-        return periodo.getCompras();
+        return  compra;
     }
 
 
