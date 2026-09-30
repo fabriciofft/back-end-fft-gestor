@@ -12,6 +12,7 @@ import lombok.Setter;
 public class GastoComCategoriaResponseDTO {
 
     private String nomeCategoria;
+    private Integer indiceIcon;
     private Double valorGastoComSaldo;
     private Double valorGastoComCartao;
 }

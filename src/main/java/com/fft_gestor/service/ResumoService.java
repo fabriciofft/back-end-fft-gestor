@@ -11,6 +11,7 @@ import com.fft_gestor.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,12 +39,12 @@ public class ResumoService {
             cartoesSimplificadoUsuario.add(cartaoSimplificado);
         }
 
-        ResumoResponseDTO resumo = new ResumoResponseDTO(
-            acaoRepository.buscarGatosPorCategoriaDeUmUsuario(codigoUsuario),
+        LocalDate hoje = LocalDate.now();
+
+        return new ResumoResponseDTO(
+            acaoRepository.buscarGatosPorCategoriaDeUmUsuario(codigoUsuario, hoje.minusDays(30), hoje),
             cartoesSimplificadoUsuario
         );
-
-        return resumo;
     }
 
     //Métodos privados
