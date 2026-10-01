@@ -13,6 +13,5 @@ public class GastoComCategoriaResponseDTO {
 
     private String nomeCategoria;
     private Integer indiceIcon;
-    private Double valorGastoComSaldo;
-    private Double valorGastoComCartao;
+    private Double valorGasto;
 }

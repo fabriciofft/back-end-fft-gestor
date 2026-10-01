@@ -28,11 +28,24 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
                     WHEN a.tipoTransacao = 'saida' THEN -a.valor
                     ELSE 0
                 END
-            ),
+            )
+        )
+        FROM Usuario u
+        INNER JOIN u.dias d
+        INNER JOIN d.acoes a
+        WHERE u.codigo = :codigoUsuario
+            AND d.data BETWEEN :dataInicio AND :dataFim
+        GROUP BY a.categoria
+    """)
+    List<GastoComCategoriaResponseDTO> buscarGastosPorCategoriaNoSaldoDeUmUsuario(Long codigoUsuario, LocalDate dataInicio, LocalDate dataFim);
+
+    @Query("""
+        SELECT new com.fft_gestor.dto.response.GastoComCategoriaResponseDTO(
+            a.categoria,
+            MAX(a.indiceIcon),
             SUM(
                 CASE
-                    WHEN a.tipoTransacao  = 'quitacaoCartao' THEN a.valor
-                    WHEN a.tipoTransacao = 'cartaoCredito' THEN -a.valor
+                    WHEN a.tipoTransacao  = 'cartaoCredito' THEN a.valor
                     ELSE 0
                 END
             )
@@ -44,5 +57,5 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
             AND d.data BETWEEN :dataInicio AND :dataFim
         GROUP BY a.categoria
     """)
-    List<GastoComCategoriaResponseDTO> buscarGatosPorCategoriaDeUmUsuario(Long codigoUsuario, LocalDate dataInicio, LocalDate dataFim);
+    List<GastoComCategoriaResponseDTO> buscarGastosPorCategoriaNoCartaoDeUmUsuario(Long codigoUsuario, LocalDate dataInicio, LocalDate dataFim);
 }

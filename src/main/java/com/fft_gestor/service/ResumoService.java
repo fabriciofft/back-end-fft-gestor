@@ -42,7 +42,8 @@ public class ResumoService {
         LocalDate hoje = LocalDate.now();
 
         return new ResumoResponseDTO(
-            acaoRepository.buscarGatosPorCategoriaDeUmUsuario(codigoUsuario, hoje.minusDays(30), hoje),
+            acaoRepository.buscarGastosPorCategoriaNoSaldoDeUmUsuario(codigoUsuario, hoje.minusDays(30), hoje),
+            acaoRepository.buscarGastosPorCategoriaNoCartaoDeUmUsuario(codigoUsuario, hoje.minusDays(30), hoje),
             cartoesSimplificadoUsuario
         );
     }

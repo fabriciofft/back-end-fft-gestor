@@ -42,7 +42,7 @@ public class CategoriaService {
 
         CategoriaModel categoria = new CategoriaModel(
             null,
-            salvarCategoriaRequestDTO.getNome(),
+            salvarCategoriaRequestDTO.getNome().trim(),
             salvarCategoriaRequestDTO.getIndiceIcon()
         );
 
