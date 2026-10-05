@@ -93,7 +93,8 @@ public class DespesaService {
     }
 
     public String lancarDespesaDeUmUsuario(LancarDespesaRequestDTO lancarDespesaRequestDTO){
-        DiaModel diaAtual = buscarDiaAtualPorData(LocalDate.now());
+        UsuarioModel usuario = buscarUsuarioPorCodigoDeDespesa(lancarDespesaRequestDTO.getCodigo());
+        DiaModel diaAtual = buscarDiaAtualPorDataDeUmUsuario(LocalDate.now(), usuario.getCodigo());
         CartaoModel cartao = new CartaoModel();
         DespesaModel despesa = buscarDespesaPorCodigo(lancarDespesaRequestDTO.getCodigo());
 
@@ -147,8 +148,8 @@ public class DespesaService {
                 .orElseThrow(() -> new RequestException("Despesa inexistente!"));
     }
 
-    private DiaModel buscarDiaAtualPorData(LocalDate data){
-        return diaRepository.findByData(data)
+    private DiaModel buscarDiaAtualPorDataDeUmUsuario(LocalDate data, Long codigoUsuario){
+        return diaRepository.buscarDiaAtualPorDataDeUmUsuario(data, codigoUsuario)
                 .orElseThrow(() -> new RequestException("O dia atual ainda não foi adicionado no menu Gestão. Para você possa quitar essa compra, adicione o dia atual no menu Gestão!"));
     }
 }

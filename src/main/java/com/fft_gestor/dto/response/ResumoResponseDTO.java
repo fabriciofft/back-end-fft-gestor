@@ -13,7 +13,9 @@ import java.util.List;
 @AllArgsConstructor
 public class ResumoResponseDTO {
 
-    private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoSaldo;
-    private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoCartao;
+    private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoSaldoNosUltimosSeteDias;
+    private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoSaldoNosUltimosTrintaDias;
+    private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoCartaoNosUltimosSeteDias;
+    private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoCartaoNosUltimosTrintaDias;
     private List<CartaoSimplificadoResponseDTO> cartoesSimplificados;
 }

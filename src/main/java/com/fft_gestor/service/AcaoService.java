@@ -6,6 +6,8 @@ import com.fft_gestor.exception.RequestException;
 import com.fft_gestor.model.*;
 import com.fft_gestor.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -136,7 +138,7 @@ public class AcaoService {
         return acao;
     }
 
-    public List<DiaModel> reverterAcao(Long codigo){
+    public Page<DiaModel> reverterAcao(Long codigo, Pageable pageable){
         AcaoModel acao = buscarAcaoPeloCodigo(codigo);
 
         CartaoModel cartao = new CartaoModel();
@@ -187,7 +189,7 @@ public class AcaoService {
         dia.getAcoes().remove(acao);
 
         usuarioRepository.save(usuario);
-        return diaRepository.listarDiasDeUmUsuario(usuario.getCodigo());
+        return diaRepository.listarDiasDeUmUsuario(usuario.getCodigo(), pageable);
     }
 
 

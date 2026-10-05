@@ -2,14 +2,8 @@ package com.fft_gestor.service;
 
 import com.fft_gestor.dto.request.AdicionarAcaoRequestDTO;
 import com.fft_gestor.exception.RequestException;
-import com.fft_gestor.model.CartaoModel;
-import com.fft_gestor.model.CompraModel;
-import com.fft_gestor.model.DiaModel;
-import com.fft_gestor.model.PeriodoModel;
-import com.fft_gestor.repository.CartaoRepository;
-import com.fft_gestor.repository.CompraRepository;
-import com.fft_gestor.repository.DiaRepository;
-import com.fft_gestor.repository.PeriodoRepository;
+import com.fft_gestor.model.*;
+import com.fft_gestor.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +12,9 @@ import java.util.List;
 
 @Service
 public class CompraService {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private DiaRepository diaRepository;
@@ -47,7 +44,6 @@ public class CompraService {
         }
 
         Long primeiroCodigo = codigos.getFirst();
-        System.out.println(primeiroCodigo);
         PeriodoModel periodo = buscarPeriodoPorCodigoDeCompra(primeiroCodigo);
 
         for(Long codigo: codigos){
@@ -67,8 +63,11 @@ public class CompraService {
     }
 
     public CompraModel quitarCompra(Long codigo){
-        DiaModel diaAtual = buscarDiaAtualPorData(LocalDate.now());
         CompraModel compra = buscarCompraPorCodigo(codigo);
+
+        UsuarioModel usuario = buscarUsuarioPorCodigoDeCompra(compra.getCodigo());
+        DiaModel diaAtual = buscarDiaAtualPorDataDeUmUsuario(LocalDate.now(), usuario.getCodigo());
+
         CartaoModel cartao = buscarCartaoPorCodigoDeCompra(compra.getCodigo());
 
         if(compra.getQuitado()){
@@ -96,8 +95,13 @@ public class CompraService {
 
 
     //Métodos privados
-    private DiaModel buscarDiaAtualPorData(LocalDate data){
-        return diaRepository.findByData(data)
+    private UsuarioModel buscarUsuarioPorCodigoDeCompra(Long codigo){
+        return usuarioRepository.buscarUsuarioPorCodigoDeCompra(codigo)
+                .orElseThrow(() -> new RequestException("Usuário inexistente!"));
+    }
+
+    private DiaModel buscarDiaAtualPorDataDeUmUsuario(LocalDate data, Long codigoUsuario){
+        return diaRepository.buscarDiaAtualPorDataDeUmUsuario(data, codigoUsuario)
                 .orElseThrow(() -> new RequestException("O dia atual ainda não foi adicionado no menu Gestão. Para você possa quitar essa compra, adicione o dia atual no menu Gestão!"));
     }
 

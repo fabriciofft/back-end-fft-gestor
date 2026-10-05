@@ -7,6 +7,8 @@ import com.fft_gestor.model.UsuarioModel;
 import com.fft_gestor.repository.DiaRepository;
 import com.fft_gestor.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,13 +25,13 @@ public class DiaService {
     private UsuarioRepository usuarioRepository;
 
 
-    public List<DiaModel> listarDiasDeUmUsuario(Long codigoUsuario){
+    public Page<DiaModel> listarDiasDeUmUsuario(Long codigoUsuario, Pageable pageable){
         UsuarioModel usuario = buscarUsuarioPorCodigo(codigoUsuario);
 
-        return diaRepository.listarDiasDeUmUsuario(usuario.getCodigo());
+        return diaRepository.listarDiasDeUmUsuario(usuario.getCodigo(), pageable);
     }
 
-    public List<DiaModel> criarDia(CriarDiaRequestDTO criarDiaRequestDTO){
+    public Page<DiaModel> criarDia(CriarDiaRequestDTO criarDiaRequestDTO, Pageable pageable){
         UsuarioModel usuario = buscarUsuarioPorCodigo(criarDiaRequestDTO.getCodigoUsuario());
 
         LocalDate data = LocalDate.parse(criarDiaRequestDTO.getData());
@@ -54,7 +56,7 @@ public class DiaService {
         usuario.getDias().add(dia);
         usuarioRepository.save(usuario);
 
-        return diaRepository.listarDiasDeUmUsuario(usuario.getCodigo());
+        return diaRepository.listarDiasDeUmUsuario(usuario.getCodigo(), pageable);
     }
 
     public String excluirDiaPeloCodigo(Long codigo){

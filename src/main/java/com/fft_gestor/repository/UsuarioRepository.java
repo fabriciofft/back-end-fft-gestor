@@ -27,4 +27,7 @@ public interface UsuarioRepository extends JpaRepository<UsuarioModel, Long> {
 
     @Query(value = "select u from Usuario u inner join u.dias d inner join d.acoes a where a.codigo = :codigoAcao")
     Optional<UsuarioModel> buscarUsuarioPorCodigoDeAcao(Long codigoAcao);
+
+    @Query(value = "select u from Usuario u inner join u.cartoes c inner join c.periodos p inner join p.compras cp where cp.codigo = :codigo")
+    Optional<UsuarioModel> buscarUsuarioPorCodigoDeCompra(Long codigo);
 }

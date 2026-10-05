@@ -52,7 +52,7 @@ public class UsuarioService {
             throw new RequestException("A senha deve ter no minímo 8 e no máximo 20 digitos!");
         }
 
-        if(validarCodigoDeConfirmacao(salvarUsuarioRequestDTO.getEmail().trim(), salvarUsuarioRequestDTO.getCodigoConfirmacao())){
+        //if(validarCodigoDeConfirmacao(salvarUsuarioRequestDTO.getEmail().trim(), salvarUsuarioRequestDTO.getCodigoConfirmacao())){
             UsuarioModel usuario = new UsuarioModel(
                 null,
                 salvarUsuarioRequestDTO.getNome(),
@@ -67,10 +67,10 @@ public class UsuarioService {
             );
 
             return usuarioRepository.save(usuario);
-        }
-        else{
-            throw new RequestException("Erro ao cadastrar!");
-        }
+        //}
+        //else{
+        //    throw new RequestException("Erro ao cadastrar!");
+        //}
     }
 
     public LoginResponseDTO fazerLogin(FazerLoginRequestDTO fazerLoginRequestDTO){
@@ -85,7 +85,7 @@ public class UsuarioService {
             );
         }
         else{
-            throw new RequestException("Senha incorreta!");
+            throw new RequestException("Credenciais incorretas!");
         }
     }
 
@@ -133,7 +133,7 @@ public class UsuarioService {
 
     private UsuarioModel buscarUsuarioPorEmail(String email){
         return usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RequestException("Usuário inexistente!"));
+                .orElseThrow(() -> new RequestException("Credenciais incorretas!"));
     }
 
     private CodigoConfirmacaoModel buscarCodigoConfirmacaoPorEmailDoUsuario(String email){

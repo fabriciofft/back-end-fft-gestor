@@ -3,6 +3,7 @@ package com.fft_gestor.controller;
 import com.fft_gestor.dto.request.AdicionarAcaoRequestDTO;
 import com.fft_gestor.service.AcaoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class AcaoController {
     }
 
     @DeleteMapping(path = "/{codigo}")
-    public ResponseEntity<?> reverterAcao(@PathVariable Long codigo){
-        return new ResponseEntity<>(acaoService.reverterAcao(codigo), HttpStatus.OK);
+    public ResponseEntity<?> reverterAcao(@PathVariable Long codigo, Pageable pageable){
+        return new ResponseEntity<>(acaoService.reverterAcao(codigo, pageable), HttpStatus.OK);
     }
 }
