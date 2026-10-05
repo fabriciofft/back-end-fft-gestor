@@ -17,5 +17,7 @@ public class ResumoResponseDTO {
     private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoSaldoNosUltimosTrintaDias;
     private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoCartaoNosUltimosSeteDias;
     private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoCartaoNosUltimosTrintaDias;
+    private Double totalDespesas;
+    private Double totalDespesasLancadas;
     private List<CartaoSimplificadoResponseDTO> cartoesSimplificados;
 }

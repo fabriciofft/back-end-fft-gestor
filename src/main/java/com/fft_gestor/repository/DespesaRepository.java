@@ -14,6 +14,12 @@ public interface DespesaRepository extends JpaRepository<DespesaModel, Long> {
     @Query
     Optional<DespesaModel> findByCodigo(Long codigo);
 
+    @Query(value = "select sum(d.valor) from Usuario u inner join u.despesas d where u.codigo = :codigoUsuario")
+    Double buscarTotalDespesasDeUmUsuario(Long codigoUsuario);
+
+    @Query(value = "select sum(d.valor) from Usuario u inner join u.despesas d where u.codigo = :codigoUsuario and d.jaFoiLancadaEsseMes = true")
+    Double buscarTotalDespesasLancadasDeUmUsuario(Long codigoUsuario);
+
     @Query(value = "select d from Usuario u inner join u.despesas d where u.codigo = :codigoUsuario order by d.diaVencimento asc")
     List<DespesaModel> listarDespesasDeUmUsuario(Long codigoUsuario);
 }

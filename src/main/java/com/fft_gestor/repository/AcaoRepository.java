@@ -1,5 +1,6 @@
 package com.fft_gestor.repository;
 
+import com.fft_gestor.dto.response.AcaoCategoriaResponseDTO;
 import com.fft_gestor.dto.response.BuscaLimitesResponseDTO;
 import com.fft_gestor.dto.response.GastoComCategoriaResponseDTO;
 import com.fft_gestor.model.AcaoModel;
@@ -58,4 +59,23 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
         GROUP BY a.categoria
     """)
     List<GastoComCategoriaResponseDTO> buscarGastosPorCategoriaNoCartaoDeUmUsuario(Long codigoUsuario, LocalDate dataInicio, LocalDate dataFim);
+
+    @Query("""
+        SELECT new com.fft_gestor.dto.response.AcaoCategoriaResponseDTO(
+            a.codigo,
+            d.data,
+            a.horario,
+            a.tipoTransacao,
+            a.valor,
+            a.apelidoCartao
+        )
+        FROM Usuario u
+        INNER JOIN u.dias d
+        INNER JOIN d.acoes a
+        WHERE u.codigo = :codigoUsuario
+            AND a.categoria = :categoria
+            AND d.data BETWEEN :dataInicio AND :dataFim
+        ORDER BY d.data DESC
+    """)
+    List<AcaoCategoriaResponseDTO> buscarAcoesPorCategoriaDeumUsuario(Long codigoUsuario, String categoria, LocalDate dataInicio, LocalDate dataFim);
 }
