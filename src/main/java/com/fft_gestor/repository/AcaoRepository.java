@@ -46,7 +46,7 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
             MAX(a.indiceIcon),
             SUM(
                 CASE
-                    WHEN a.tipoTransacao  = 'cartaoCredito' THEN a.valor
+                    WHEN a.tipoTransacao  = 'cartaoCredito' OR  a.tipoTransacao  = 'quitacaoCartao' THEN a.valor
                     ELSE 0
                 END
             )
