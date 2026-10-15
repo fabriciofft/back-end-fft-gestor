@@ -82,14 +82,14 @@ public class DespesaService {
         return listarDespesasDeUmUsuario(codigoUsuario);
     }
 
-    public List<DespesaModel> excluirDespesaPorCodigo(Long codigo){
+    public String excluirDespesaPorCodigo(Long codigo){
        DespesaModel despesa = buscarDespesaPorCodigo(codigo);
        UsuarioModel usuario = buscarUsuarioPorCodigoDeDespesa(despesa.getCodigo());
 
        usuario.getDespesas().remove(despesa);
        despesaRepository.delete(despesa);
 
-       return usuario.getDespesas();
+       return "Despesa excluída com sucesso";
     }
 
     public String lancarDespesaDeUmUsuario(LancarDespesaRequestDTO lancarDespesaRequestDTO){

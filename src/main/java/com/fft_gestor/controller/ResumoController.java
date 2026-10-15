@@ -24,4 +24,9 @@ public class ResumoController {
     public ResponseEntity<?> buscarAcoesPorCategoriaDeUmUsuario(@RequestBody BuscarAcoesPorCategoriaRequestDTO buscarAcoesPorCategoriaRequestDTO){
         return new ResponseEntity<>(resumoService.buscarAcoesPorCategoriaDeumUsuario(buscarAcoesPorCategoriaRequestDTO), HttpStatus.OK);
     }
+
+    @GetMapping(path = "/teste/{codigoUsuario}")
+    public ResponseEntity<?> teste(@PathVariable Long codigoUsuario){
+        return new ResponseEntity<>(resumoService.buscarGastosUltimos7Dias(codigoUsuario), HttpStatus.OK);
+    }
 }

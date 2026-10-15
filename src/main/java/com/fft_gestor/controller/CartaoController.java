@@ -1,5 +1,6 @@
 package com.fft_gestor.controller;
 
+import com.fft_gestor.dto.request.AlterarLimiteCartaoRequestDTO;
 import com.fft_gestor.dto.request.CriarCartaoRequestDTO;
 import com.fft_gestor.dto.request.LancarCompraNoCartaoRequestDTO;
 import com.fft_gestor.dto.response.CartaoResponseDTO;
@@ -51,9 +52,9 @@ public class CartaoController {
         return new ResponseEntity<>(cartaoService.lancarCompraNoCartao(lancarCompraNoCartaoRequest), HttpStatus.CREATED);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> excluirCartoes(){
-        return new ResponseEntity<>(cartaoService.excluirTodosCartoes(), HttpStatus.CREATED);
+    @PutMapping(path = "/alterarLimite")
+    public ResponseEntity<?> alterarLimiteCartao(@RequestBody AlterarLimiteCartaoRequestDTO alterarLimiteCartaoRequest){
+        return new ResponseEntity<>(cartaoService.alterarLimiteCartao(alterarLimiteCartaoRequest), HttpStatus.OK);
     }
 
 

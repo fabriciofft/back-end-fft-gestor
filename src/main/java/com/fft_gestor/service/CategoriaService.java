@@ -52,14 +52,14 @@ public class CategoriaService {
         return usuario.getCategorias();
     }
 
-    public List<CategoriaModel> excluirCategoria(Long codigo){
+    public String excluirCategoria(Long codigo){
         CategoriaModel categoria = buscarCategoriaPorCodigo(codigo);
         UsuarioModel usuario = buscarUsuarioPorCodigoDeCategoria(categoria.getCodigo());
 
         usuario.getCategorias().remove(categoria);
         categoriaRepository.delete(categoria);
 
-        return usuario.getCategorias();
+        return "Categoria excluída com sucesso";
     }
 
 

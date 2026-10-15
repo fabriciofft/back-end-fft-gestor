@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ResumoResponseDTO {
 
+    private List<GastoPorDiaResponseDTO> gastosNosUltimos7Dias;
     private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoSaldoNosUltimosSeteDias;
     private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoSaldoNosUltimosTrintaDias;
     private List<GastoComCategoriaResponseDTO> gastosPorCategoriasNoCartaoNosUltimosSeteDias;

@@ -78,4 +78,21 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
         ORDER BY d.data DESC
     """)
     List<AcaoCategoriaResponseDTO> buscarAcoesPorCategoriaDeumUsuario(Long codigoUsuario, String categoria, LocalDate dataInicio, LocalDate dataFim);
+
+    @Query("""
+        SELECT COALESCE(
+            SUM(
+                CASE
+                    WHEN a.tipoTransacao  = 'saida' OR  a.tipoTransacao  = 'cartaoCredito' THEN a.valor
+                ELSE 0
+                END
+            )
+            , 0.0
+        ) 
+        FROM Usuario u 
+        INNER JOIN u.dias d 
+        INNER JOIN d.acoes a 
+        WHERE u.codigo = :codigoUsuario and d.data = :data
+    """)
+    Double gastosEmUmaData(Long codigoUsuario, LocalDate data);
 }

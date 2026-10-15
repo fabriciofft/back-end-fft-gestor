@@ -1,5 +1,6 @@
 package com.fft_gestor.service;
 
+import com.fft_gestor.dto.request.AlterarLimiteCartaoRequestDTO;
 import com.fft_gestor.dto.request.CriarCartaoRequestDTO;
 import com.fft_gestor.dto.request.LancarCompraNoCartaoRequestDTO;
 import com.fft_gestor.exception.RequestException;
@@ -68,6 +69,10 @@ public class CartaoService {
             throw new RequestException("O apelido só pode conter no máximo 8 caracteres!");
         }
 
+        if(criarCartaoRequest.getDiaVencimento() <= 0 || criarCartaoRequest.getDiaVencimento() > 28){
+            throw new RequestException("O dia do vencimento só pode ser entre os dias 1 e 28!!");
+        }
+
         if(usuario.getCartoes().size() >= 5){
             throw new RequestException("Você só pode ter no máximo 5 cartões cadastrados!!");
         }
@@ -76,6 +81,7 @@ public class CartaoService {
             null,
             criarCartaoRequest.getApelido().toUpperCase(),
             criarCartaoRequest.getUltimosDigitos(),
+            criarCartaoRequest.getDiaVencimento(),
             criarCartaoRequest.getLimiteTotal(),
             0.0,
             criarCartaoRequest.getCor(),
@@ -99,6 +105,12 @@ public class CartaoService {
         LocalDate dataAtual = LocalDate.now();
         PeriodoModel periodo;
 
+        //Integer diaAtual = dataAtual.getDayOfMonth();
+        Integer diaAtual = 12;
+        //Integer mesAtual = dataAtual.getMonthValue();
+        Integer mesAtual = 11;
+        Integer anoAtual = dataAtual.getYear();
+
         Long idCompra = new Random().nextLong(10000, 99999);
 
         while(compraRepository.findByIdCompra(idCompra).isPresent()){
@@ -107,21 +119,36 @@ public class CartaoService {
 
         CompraModel compra = new CompraModel(
             null,
-            dataAtual.getDayOfMonth(),
+            diaAtual,
+            mesAtual,
             lancarCompraNoCartaoRequest.getCategoria(),
             lancarCompraNoCartaoRequest.getValor(),
             false,
             idCompra
         );
 
-        if(periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), dataAtual.getMonthValue(), dataAtual.getYear()).isPresent()){
-            periodo = periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), dataAtual.getMonthValue(), dataAtual.getYear()).get();
+        if(periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), mesAtual, anoAtual).isPresent()){
+            periodo = periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), mesAtual, anoAtual).get();
+        }
+        if(periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), mesAtual - 1, anoAtual).isPresent()){
+            periodo = periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), mesAtual - 1, anoAtual).get();
+
+            if(diaAtual > cartao.getDiaVencimento() && mesAtual > periodo.getMes()){
+                periodo = new PeriodoModel(
+                    null,
+                    mesAtual,
+                    anoAtual,
+                    new ArrayList<>()
+                );
+
+                cartao.getPeriodos().add(periodo);
+            };
         }
         else{
             periodo = new PeriodoModel(
                 null,
-                dataAtual.getMonthValue(),
-                dataAtual.getYear(),
+                mesAtual,
+                anoAtual,
                 new ArrayList<>()
             );
 
@@ -134,9 +161,16 @@ public class CartaoService {
         return idCompra;
     }
 
-    public String excluirTodosCartoes(){
-        cartaoRepository.deleteAll();
-        return "Cartões excluídos com sucesso!";
+    public CartaoModel alterarLimiteCartao(AlterarLimiteCartaoRequestDTO alterarLimiteCartaoRequest){
+        CartaoModel cartao = buscarCartaoPorCodigo(alterarLimiteCartaoRequest.getCodigoCartao());
+
+        if(alterarLimiteCartaoRequest.getNovoLimite() < cartao.getLimiteUtilizado()){
+            throw new RequestException("O novo limite não pode ser menor que o limite utilizado atual. Se deseja diminuir seu limite, primeiro libere o mesmo, quitando compras, na aba 'fatura'!");
+        }
+
+        cartao.setLimiteTotal(alterarLimiteCartaoRequest.getNovoLimite());
+
+        return cartaoRepository.save(cartao);
     }
 
 

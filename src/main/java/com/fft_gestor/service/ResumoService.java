@@ -1,10 +1,7 @@
 package com.fft_gestor.service;
 
 import com.fft_gestor.dto.request.BuscarAcoesPorCategoriaRequestDTO;
-import com.fft_gestor.dto.response.AcaoCategoriaResponseDTO;
-import com.fft_gestor.dto.response.CartaoSimplificadoResponseDTO;
-import com.fft_gestor.dto.response.GastoComCategoriaResponseDTO;
-import com.fft_gestor.dto.response.ResumoResponseDTO;
+import com.fft_gestor.dto.response.*;
 import com.fft_gestor.exception.RequestException;
 import com.fft_gestor.model.CartaoModel;
 import com.fft_gestor.model.UsuarioModel;
@@ -48,10 +45,11 @@ public class ResumoService {
         LocalDate hoje = LocalDate.now();
 
         return new ResumoResponseDTO(
-            acaoRepository.buscarGastosPorCategoriaNoSaldoDeUmUsuario(codigoUsuario, hoje.minusDays(7), hoje),
-            acaoRepository.buscarGastosPorCategoriaNoSaldoDeUmUsuario(codigoUsuario, hoje.minusDays(30), hoje),
-            acaoRepository.buscarGastosPorCategoriaNoCartaoDeUmUsuario(codigoUsuario, hoje.minusDays(7), hoje),
-            acaoRepository.buscarGastosPorCategoriaNoCartaoDeUmUsuario(codigoUsuario, hoje.minusDays(30), hoje),
+            buscarGastosUltimos7Dias(codigoUsuario),
+            acaoRepository.buscarGastosPorCategoriaNoSaldoDeUmUsuario(codigoUsuario, hoje.minusDays(6), hoje),
+            acaoRepository.buscarGastosPorCategoriaNoSaldoDeUmUsuario(codigoUsuario, hoje.minusDays(29), hoje),
+            acaoRepository.buscarGastosPorCategoriaNoCartaoDeUmUsuario(codigoUsuario, hoje.minusDays(6), hoje),
+            acaoRepository.buscarGastosPorCategoriaNoCartaoDeUmUsuario(codigoUsuario, hoje.minusDays(29), hoje),
             despesaRepository.buscarTotalDespesasDeUmUsuario(codigoUsuario),
             despesaRepository.buscarTotalDespesasLancadasDeUmUsuario(codigoUsuario),
             cartoesSimplificadoUsuario
@@ -60,7 +58,7 @@ public class ResumoService {
 
     public List<AcaoCategoriaResponseDTO> buscarAcoesPorCategoriaDeumUsuario(BuscarAcoesPorCategoriaRequestDTO buscarAcoesPorCategoriaRequestDTO){
         LocalDate hoje = LocalDate.now();
-        LocalDate inicio = hoje.minusDays((buscarAcoesPorCategoriaRequestDTO.getPeriodo().equals("semana")) ? 7 : 30);
+        LocalDate inicio = hoje.minusDays((buscarAcoesPorCategoriaRequestDTO.getPeriodo().equals("semana")) ? 6 : 29);
 
         return acaoRepository.buscarAcoesPorCategoriaDeumUsuario(buscarAcoesPorCategoriaRequestDTO.getCodigoUsuario(), buscarAcoesPorCategoriaRequestDTO.getCategoria(), inicio, hoje);
     }
@@ -69,5 +67,25 @@ public class ResumoService {
     private UsuarioModel buscarUsuarioPorCodigo(Long codigo){
         return usuarioRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RequestException("Usuário inexistente!"));
+    }
+
+    public List<GastoPorDiaResponseDTO> buscarGastosUltimos7Dias(Long codigoUsuario){
+        UsuarioModel usuario = buscarUsuarioPorCodigo(codigoUsuario);
+        LocalDate hoje = LocalDate.now();
+
+        List<GastoPorDiaResponseDTO> gastosUltimos7Dias = new ArrayList<>();
+
+        for(int i = 0; i <= 6; i++){
+            LocalDate dia = hoje.minusDays(i);
+
+            gastosUltimos7Dias.add(
+                new GastoPorDiaResponseDTO(
+                    dia,
+                    acaoRepository.gastosEmUmaData(usuario.getCodigo(), dia)
+                )
+            );
+        }
+
+        return gastosUltimos7Dias;
     }
 }

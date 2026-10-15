@@ -20,6 +20,8 @@ public class CompraModel {
 
     @Column(length = 2)
     private Integer dia;
+    @Column(length = 2)
+    private Integer mes;
     @Column(length = 20)
     private String descricao;
     private Double valor;

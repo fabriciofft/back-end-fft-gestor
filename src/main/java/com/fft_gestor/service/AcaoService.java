@@ -138,7 +138,7 @@ public class AcaoService {
         return acao;
     }
 
-    public Page<DiaModel> reverterAcao(Long codigo, Pageable pageable){
+    public DiaModel reverterAcao(Long codigo, Pageable pageable){
         AcaoModel acao = buscarAcaoPeloCodigo(codigo);
 
         CartaoModel cartao = new CartaoModel();
@@ -189,7 +189,7 @@ public class AcaoService {
         dia.getAcoes().remove(acao);
 
         usuarioRepository.save(usuario);
-        return diaRepository.listarDiasDeUmUsuario(usuario.getCodigo(), pageable);
+        return dia;
     }
 
 
