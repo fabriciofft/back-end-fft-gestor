@@ -13,6 +13,9 @@ public class SaldoReponseDTO {
 
     private Double saldoInicial;
     private Double saldoAtual;
+    private Double totalLimitesFaturasPassadasUtilizado;
+    private Double totalLimitesFaturasAtuaisUtilizado;
+    private Double totalLimitesFaturasFuturasUtilizado;
     private Double totalLimiteUtilizado;
     private Double totalLimiteTotal;
 }

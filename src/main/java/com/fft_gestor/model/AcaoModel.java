@@ -28,4 +28,5 @@ public class AcaoModel {
     @Column(length = 8)
     private String apelidoCartao;
     private Long idCompra;
+    private Integer numeroParcelas;
 }

@@ -57,7 +57,9 @@ public class AcaoService {
 
                 LancarCompraNoCartaoRequestDTO lancarCompraNoCartaoRequest = new LancarCompraNoCartaoRequestDTO(
                     cartao.getCodigo(),
+                    dia.getData(),
                     adicionarAcaoRequestDTO.getCategoria(),
+                    adicionarAcaoRequestDTO.getNumeroParcelas(),
                     adicionarAcaoRequestDTO.getValor()
                 );
 
@@ -128,7 +130,8 @@ public class AcaoService {
                 adicionarAcaoRequestDTO.getIndiceIcon(),
                 adicionarAcaoRequestDTO.getValor(),
                 adicionarAcaoRequestDTO.getApelidoCartao(),
-                idCompra
+                idCompra,
+                adicionarAcaoRequestDTO.getNumeroParcelas()
             );
 
             dia.getAcoes().add(acao);
@@ -160,24 +163,26 @@ public class AcaoService {
                 break;
             }
             case "cartaoCredito":{
-                CompraModel compra = buscarCompraPeloIdCompra(acao.getIdCompra());
+               List<CompraModel> parcelas = listarParcelasPeloIdDeCompra(acao.getIdCompra());
 
-                cartao = buscarCartaoPorCodigoDeCompra(compra.getCodigo());
-                PeriodoModel periodo = buscarPeriodoPorCodigoDeCompra(compra.getCodigo());
+               for(CompraModel parcela: parcelas){
+                   cartao = buscarCartaoPorCodigoDeCompra(parcela.getCodigo());
+                   PeriodoModel periodo = buscarPeriodoPorCodigoDeCompra(parcela.getCodigo());
 
-                cartao.setLimiteUtilizado(cartao.getLimiteUtilizado() - compra.getValor());
-                periodo.getCompras().remove(compra);
+                   cartao.setLimiteUtilizado(cartao.getLimiteUtilizado() - parcela.getValor());
+                   periodo.getCompras().remove(parcela);
 
-                if(periodo.getCompras().isEmpty()){
-                    cartao.getPeriodos().remove(periodo);
-                }
+                   if(periodo.getCompras().isEmpty()){
+                       cartao.getPeriodos().remove(periodo);
+                   }
+               }
 
-                MetricasUsoCartaoModel metricasUsoCartao = buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo());
+                /*MetricasUsoCartaoModel metricasUsoCartao = buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo());
                 metricasUsoCartao.setLimiteUsadoAtual(metricasUsoCartao.getLimiteUsadoAtual() - compra.getValor());
 
                 if(metricasUsoCartao.getLimiteUsadoAtual().equals(metricasUsoCartao.getLimiteUsadoInicial())){
                     dia.getHistoricoUsoCartoes().remove(metricasUsoCartao);
-                }
+                }*/
 
                 break;
             }
@@ -224,9 +229,8 @@ public class AcaoService {
             .orElseThrow(() -> new RequestException("Periodo inexistente!"));
     }
 
-    private CompraModel buscarCompraPeloIdCompra(long idCompra){
-        return compraRepository.findByIdCompra(idCompra)
-            .orElseThrow(() -> new RequestException("Compra inexistente!"));
+    private List<CompraModel> listarParcelasPeloIdDeCompra(long idCompra){
+        return compraRepository.listarParcelasPeloIdDeCompra(idCompra);
     }
 
     private MetricasUsoCartaoModel buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(Long codigoDia, Long codigoCartao) {

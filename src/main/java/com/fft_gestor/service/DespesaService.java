@@ -113,7 +113,8 @@ public class DespesaService {
             apelidoCartao,
             "despesa",
             lancarDespesaRequestDTO.getFormaPagamento(),
-        0,
+            0,
+            1,
             despesa.getValor(),
             null
         );

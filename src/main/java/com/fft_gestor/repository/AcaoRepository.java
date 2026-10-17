@@ -1,7 +1,6 @@
 package com.fft_gestor.repository;
 
 import com.fft_gestor.dto.response.AcaoCategoriaResponseDTO;
-import com.fft_gestor.dto.response.BuscaLimitesResponseDTO;
 import com.fft_gestor.dto.response.GastoComCategoriaResponseDTO;
 import com.fft_gestor.model.AcaoModel;
 import org.springframework.data.jpa.repository.JpaRepository;

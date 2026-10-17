@@ -25,7 +25,7 @@ public class CartaoModel {
     private String apelido;
     @Column(length = 4)
     private Integer ultimosDigitos;
-    private Integer diaVencimento;
+    private Integer diaFechamento;
     private Double limiteTotal;
     private Double limiteUtilizado;
 

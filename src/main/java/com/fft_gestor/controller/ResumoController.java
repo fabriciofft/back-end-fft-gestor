@@ -17,16 +17,11 @@ public class ResumoController {
 
     @GetMapping(path = "/{codigoUsuario}")
     public ResponseEntity<?> buscarGastosPorCategoriaDeUmUsuario(@PathVariable Long codigoUsuario){
-        return new ResponseEntity<>(resumoService.buscarGatosPorCategoriaDeUmUsuario(codigoUsuario), HttpStatus.OK);
+        return new ResponseEntity<>(resumoService.buscarGastosPorCategoriaDeUmUsuario(codigoUsuario), HttpStatus.OK);
     }
 
     @PostMapping(path = "/acoesPorCategoria")
     public ResponseEntity<?> buscarAcoesPorCategoriaDeUmUsuario(@RequestBody BuscarAcoesPorCategoriaRequestDTO buscarAcoesPorCategoriaRequestDTO){
         return new ResponseEntity<>(resumoService.buscarAcoesPorCategoriaDeumUsuario(buscarAcoesPorCategoriaRequestDTO), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "/teste/{codigoUsuario}")
-    public ResponseEntity<?> teste(@PathVariable Long codigoUsuario){
-        return new ResponseEntity<>(resumoService.buscarGastosUltimos7Dias(codigoUsuario), HttpStatus.OK);
     }
 }

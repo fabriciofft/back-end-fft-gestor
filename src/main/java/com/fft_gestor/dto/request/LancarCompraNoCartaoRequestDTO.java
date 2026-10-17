@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,6 +14,8 @@ import lombok.Setter;
 public class LancarCompraNoCartaoRequestDTO {
 
     private Long codigoCartao;
+    private LocalDate data;
     private String categoria;
+    private Integer numeroParcelas;
     private Double valor;
 }

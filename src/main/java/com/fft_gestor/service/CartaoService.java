@@ -15,9 +15,14 @@ import com.fft_gestor.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -69,7 +74,7 @@ public class CartaoService {
             throw new RequestException("O apelido só pode conter no máximo 8 caracteres!");
         }
 
-        if(criarCartaoRequest.getDiaVencimento() <= 0 || criarCartaoRequest.getDiaVencimento() > 28){
+        if(criarCartaoRequest.getDiaFechamento() <= 0 || criarCartaoRequest.getDiaFechamento() > 28){
             throw new RequestException("O dia do vencimento só pode ser entre os dias 1 e 28!!");
         }
 
@@ -81,7 +86,7 @@ public class CartaoService {
             null,
             criarCartaoRequest.getApelido().toUpperCase(),
             criarCartaoRequest.getUltimosDigitos(),
-            criarCartaoRequest.getDiaVencimento(),
+            criarCartaoRequest.getDiaFechamento(),
             criarCartaoRequest.getLimiteTotal(),
             0.0,
             criarCartaoRequest.getCor(),
@@ -102,14 +107,9 @@ public class CartaoService {
             cartao.setLimiteUtilizado(cartao.getLimiteUtilizado() + lancarCompraNoCartaoRequest.getValor());
         }
 
-        LocalDate dataAtual = LocalDate.now();
-        PeriodoModel periodo;
-
-        //Integer diaAtual = dataAtual.getDayOfMonth();
-        Integer diaAtual = 12;
-        //Integer mesAtual = dataAtual.getMonthValue();
-        Integer mesAtual = 11;
-        Integer anoAtual = dataAtual.getYear();
+        int diaAtual = lancarCompraNoCartaoRequest.getData().getDayOfMonth();
+        int mesAtual = lancarCompraNoCartaoRequest.getData().getMonthValue();
+        int anoAtual = lancarCompraNoCartaoRequest.getData().getYear();
 
         Long idCompra = new Random().nextLong(10000, 99999);
 
@@ -117,45 +117,64 @@ public class CartaoService {
             idCompra = new Random().nextLong(10000, 99999);
         }
 
+        Integer numeroParcelas = lancarCompraNoCartaoRequest.getNumeroParcelas();
+
         CompraModel compra = new CompraModel(
             null,
             diaAtual,
             mesAtual,
             lancarCompraNoCartaoRequest.getCategoria(),
-            lancarCompraNoCartaoRequest.getValor(),
+            lancarCompraNoCartaoRequest.getValor() / numeroParcelas,
             false,
             idCompra
         );
 
-        if(periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), mesAtual, anoAtual).isPresent()){
-            periodo = periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), mesAtual, anoAtual).get();
+        if (numeroParcelas < 1) {
+            throw new RequestException(
+                "O número de parcelas deve ser maior que zero."
+            );
         }
-        if(periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), mesAtual - 1, anoAtual).isPresent()){
-            periodo = periodoRepository.buscarPeriodoEmDeterminadoCartao(cartao.getCodigo(), mesAtual - 1, anoAtual).get();
 
-            if(diaAtual > cartao.getDiaVencimento() && mesAtual > periodo.getMes()){
-                periodo = new PeriodoModel(
-                    null,
-                    mesAtual,
-                    anoAtual,
-                    new ArrayList<>()
-                );
-
-                cartao.getPeriodos().add(periodo);
-            };
+        if (diaAtual == cartao.getDiaFechamento()) {
+            throw new RequestException(
+                "Compras no dia do fechamento não são consideradas."
+            );
         }
-        else{
-            periodo = new PeriodoModel(
+
+        YearMonth mesCalendarioAtual =  YearMonth.of(anoAtual, mesAtual);
+
+        // Determina a fatura da primeira parcela
+        YearMonth primeiraFatura;
+
+        if (diaAtual < cartao.getDiaFechamento()) {
+            primeiraFatura = mesCalendarioAtual.minusMonths(1);
+        } else {
+            primeiraFatura = mesCalendarioAtual;
+        }
+
+        // Cria cada parcela no seu respectivo período
+        for (int i = 0; i < numeroParcelas; i++) {
+
+            YearMonth mesDaParcela = primeiraFatura.plusMonths(i);
+            String indicadorParcelas = (numeroParcelas > 1) ? " (" + (i + 1)+ "/" + numeroParcelas + ")" : "";
+
+            CompraModel parcela = new CompraModel(
                 null,
-                mesAtual,
-                anoAtual,
-                new ArrayList<>()
+                compra.getDia(),
+                compra.getMes(),
+                compra.getDescricao().concat(indicadorParcelas),
+                (lancarCompraNoCartaoRequest.getValor() / numeroParcelas),
+                false,
+                idCompra
             );
 
-            cartao.getPeriodos().add(periodo);
+            adicionarCompraNoPeriodo(
+                cartao,
+                parcela,
+                mesDaParcela
+            );
         }
 
-        periodo.getCompras().add(compra);
         cartaoRepository.save(cartao);
 
         return idCompra;
@@ -173,10 +192,51 @@ public class CartaoService {
         return cartaoRepository.save(cartao);
     }
 
+    public CartaoModel limparFaturaCartao(Long codigoCartao){
+        CartaoModel cartao = buscarCartaoPorCodigo(codigoCartao);
+
+        cartao.getPeriodos().clear();
+
+        return cartaoRepository.save(cartao);
+    }
+
 
     //Métodos privados
     private UsuarioModel buscarUsuarioPorCodigo(Long codigo){
         return usuarioRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RequestException("Usuário inexistente!"));
+    }
+
+
+    private void adicionarCompraNoPeriodo(
+        CartaoModel cartao,
+        CompraModel parcela,
+        YearMonth mesDaFatura
+    ) {
+        PeriodoModel periodo;
+
+        Optional<PeriodoModel> periodoExistente =
+                periodoRepository.buscarPeriodoEmDeterminadoCartao(
+                        cartao.getCodigo(),
+                        mesDaFatura.getMonthValue(),
+                        mesDaFatura.getYear()
+                );
+
+        if (periodoExistente.isEmpty()) {
+            System.out.println("Criando período: " + mesDaFatura);
+
+            periodo = new PeriodoModel(
+                null,
+                mesDaFatura.getMonthValue(),
+                mesDaFatura.getYear(),
+                new ArrayList<>()
+            );
+
+            cartao.getPeriodos().add(periodo);
+        } else {
+            periodo = periodoExistente.get();
+        }
+
+        periodo.getCompras().add(parcela);
     }
 }

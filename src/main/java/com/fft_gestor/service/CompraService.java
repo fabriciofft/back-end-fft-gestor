@@ -84,6 +84,7 @@ public class CompraService {
             compra.getDescricao(),
             "quitacaoCartao",
             0,
+            1,
             compra.getValor(),
             compra.getIdCompra()
         );

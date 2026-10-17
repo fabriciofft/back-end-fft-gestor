@@ -23,6 +23,6 @@ public interface CartaoRepository extends JpaRepository<CartaoModel, Long> {
     @Query(value = "select c from Usuario u inner join u.cartoes c where u.codigo = :codigoUsuario and c.codigo = :codigoCartao")
     Optional<CartaoModel> buscarCartaoDeUmUsuario(Long codigoUsuario, Long codigoCartao);
 
-    @Query(value = "select new com.fft_gestor.dto.response.BuscaLimitesResponseDTO(SUM(c.limiteUtilizado),SUM(c.limiteTotal)) from Usuario u inner join u.cartoes c where u.codigo = :codigoUsuario")
+    @Query(value = "select new com.fft_gestor.dto.response.BuscaLimitesResponseDTO(COALESCE(SUM(c.limiteUtilizado), 0.0), COALESCE(SUM(c.limiteTotal), 0)) from Usuario u inner join u.cartoes c where u.codigo = :codigoUsuario")
     BuscaLimitesResponseDTO buscarTotalDeLimiteDeCreditoUtilizadoPorUmUsuario(Long codigoUsuario);
 }

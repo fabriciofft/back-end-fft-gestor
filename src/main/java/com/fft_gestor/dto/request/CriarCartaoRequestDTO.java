@@ -10,7 +10,7 @@ public class CriarCartaoRequestDTO {
     private Long codigoUsuario;
     private String apelido;
     private Integer ultimosDigitos;
-    private Integer diaVencimento;
+    private Integer diaFechamento;
     private Double limiteTotal;
     private String cor;
 }

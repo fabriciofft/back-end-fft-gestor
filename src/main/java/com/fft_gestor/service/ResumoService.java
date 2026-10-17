@@ -28,7 +28,7 @@ public class ResumoService {
     private UsuarioRepository usuarioRepository;
 
 
-    public ResumoResponseDTO buscarGatosPorCategoriaDeUmUsuario(Long codigoUsuario){
+    public ResumoResponseDTO buscarGastosPorCategoriaDeUmUsuario(Long codigoUsuario){
         UsuarioModel usuario = buscarUsuarioPorCodigo(codigoUsuario);
         List<CartaoSimplificadoResponseDTO> cartoesSimplificadoUsuario = new ArrayList<>();
 
@@ -69,7 +69,7 @@ public class ResumoService {
                 .orElseThrow(() -> new RequestException("Usuário inexistente!"));
     }
 
-    public List<GastoPorDiaResponseDTO> buscarGastosUltimos7Dias(Long codigoUsuario){
+    private List<GastoPorDiaResponseDTO> buscarGastosUltimos7Dias(Long codigoUsuario){
         UsuarioModel usuario = buscarUsuarioPorCodigo(codigoUsuario);
         LocalDate hoje = LocalDate.now();
 

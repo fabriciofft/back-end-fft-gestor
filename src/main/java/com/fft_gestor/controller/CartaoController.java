@@ -57,6 +57,11 @@ public class CartaoController {
         return new ResponseEntity<>(cartaoService.alterarLimiteCartao(alterarLimiteCartaoRequest), HttpStatus.OK);
     }
 
+    @DeleteMapping(path = "/limparFatura/{codigo}")
+    public ResponseEntity<?> limparFaturaCartao(@PathVariable Long codigo){
+        return new ResponseEntity<>(cartaoService.limparFaturaCartao(codigo), HttpStatus.OK);
+    }
+
 
     //MEtodos privados
     private List<CartaoResponseDTO> converterEmListaDeCartaoResponseDTO(List<CartaoModel> cartoes){
