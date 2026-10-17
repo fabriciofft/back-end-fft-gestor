@@ -54,9 +54,6 @@ public class SaldoService {
 
         Double totalLimitesUtilizado = buscaLimites.getLimiteUtilizado();
 
-        System.out.println(totalLimitesFaturasPassadasUtilizado);
-        System.out.println(totalLimitesFaturasAtuaisUtilizado);
-
         return new SaldoReponseDTO(
             usuario.getSaldoInicial(),
             usuario.getSaldoAtual(),

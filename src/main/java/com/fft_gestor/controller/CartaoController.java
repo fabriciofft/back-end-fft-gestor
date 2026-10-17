@@ -62,6 +62,11 @@ public class CartaoController {
         return new ResponseEntity<>(cartaoService.limparFaturaCartao(codigo), HttpStatus.OK);
     }
 
+    @DeleteMapping(path = "/excluir/{codigo}")
+    public ResponseEntity<?> excluirCartoesDeUmUsuario(@PathVariable Long codigo){
+        return new ResponseEntity<>(cartaoService.excluirCartoesDeUmUsuario(codigo), HttpStatus.OK);
+    }
+
 
     //MEtodos privados
     private List<CartaoResponseDTO> converterEmListaDeCartaoResponseDTO(List<CartaoModel> cartoes){

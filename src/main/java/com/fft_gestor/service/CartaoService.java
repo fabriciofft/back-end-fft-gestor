@@ -200,6 +200,16 @@ public class CartaoService {
         return cartaoRepository.save(cartao);
     }
 
+    public String excluirCartoesDeUmUsuario(Long codigoUsuario){
+        UsuarioModel usuario = buscarUsuarioPorCodigo(codigoUsuario);
+
+        usuario.getCartoes().clear();
+
+        usuarioRepository.save(usuario);
+
+        return "Cartões excluidos com sucesso!";
+    }
+
 
     //Métodos privados
     private UsuarioModel buscarUsuarioPorCodigo(Long codigo){
