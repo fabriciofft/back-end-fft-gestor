@@ -25,9 +25,4 @@ public class CompraController {
     public ResponseEntity<?> quitarCompras(@RequestBody List<Long> codigosCompras){
         return new ResponseEntity<>(compraService.quitarCompras(codigosCompras), HttpStatus.OK);
     }
-
-    @PutMapping(path = "/quitar/{codigo}")
-    public ResponseEntity<?> quitarCompra(@PathVariable Long codigo){
-        return new ResponseEntity<>(compraService.quitarCompra(codigo), HttpStatus.OK);
-    }
 }

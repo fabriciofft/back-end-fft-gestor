@@ -29,13 +29,16 @@ public class CompraService {
     private CartaoRepository cartaoRepository;
 
     @Autowired
+    private AcaoRepository acaoRepository;
+
+    @Autowired
     private AcaoService acaoService;
 
 
     public List<CompraModel> listarComprasDeUmPeriodo(Long codigoPeriodo){
         PeriodoModel periodo = buscarPeriodoPorCodigo(codigoPeriodo);
 
-        return  periodo.getCompras();
+        return  compraRepository.listarComprasDeUmPeriodoPorOrdemDeData(codigoPeriodo);
     }
 
     public List<CompraModel> quitarCompras(List<Long> codigos){
@@ -55,43 +58,50 @@ public class CompraService {
             }
         }
 
-        for(Long codigo: codigos){
-            quitarCompra(codigo);
-        }
-
-        return periodo.getCompras();
-    }
-
-    public CompraModel quitarCompra(Long codigo){
-        CompraModel compra = buscarCompraPorCodigo(codigo);
-
-        UsuarioModel usuario = buscarUsuarioPorCodigoDeCompra(compra.getCodigo());
+        UsuarioModel usuario = buscarUsuarioPorCodigoDeCompra(primeiroCodigo);
+        CartaoModel cartao = buscarCartaoPorCodigoDeCompra(primeiroCodigo);
         DiaModel diaAtual = buscarDiaAtualPorDataDeUmUsuario(LocalDate.now(), usuario.getCodigo());
 
-        CartaoModel cartao = buscarCartaoPorCodigoDeCompra(compra.getCodigo());
+        Double valorQuitacao = 0.0;
 
-        if(compra.getQuitado()){
-            throw new RequestException("Essa compra já foi quitada!");
+        for(Long codigo: codigos){
+            valorQuitacao += quitarCompra(codigo, cartao);
         }
-
-        compra.setQuitado(true);
-        cartao.setLimiteUtilizado(cartao.getLimiteUtilizado() - compra.getValor());
 
         AdicionarAcaoRequestDTO adicionarAcaoRequestDTO = new AdicionarAcaoRequestDTO(
             diaAtual.getCodigo(),
             cartao.getCodigo(),
             cartao.getApelido(),
-            compra.getDescricao(),
+            "quitação cartão" ,
             "quitacaoCartao",
-            0,
             1,
-            compra.getValor(),
-            compra.getIdCompra()
+            "atual",
+            1,
+            valorQuitacao,
+           null
         );
 
         acaoService.adicionarAcaoEmUmDia(adicionarAcaoRequestDTO);
+
+        return periodo.getCompras();
+    }
+
+    public Double quitarCompra(Long codigo, CartaoModel cartao){
+        CompraModel compra = buscarCompraPorCodigo(codigo);
+
+        if(compra.getQuitado()){
+            throw new RequestException("Essa compra já foi quitada!");
+        }
+
+        AcaoModel acao = buscarAcaoPorIdCompra(compra.getIdCompra());
+        acao.setTipoTransacao("quitado");
+
+        compra.setQuitado(true);
+        cartao.setLimiteUtilizado(cartao.getLimiteUtilizado() - compra.getValor());
+
+        acaoRepository.save(acao);
         cartaoRepository.save(cartao);
-        return  compra;
+        return  compra.getValor();
     }
 
 
@@ -124,5 +134,10 @@ public class CompraService {
     private CompraModel buscarCompraPorCodigo(Long codigo){
         return  compraRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RequestException("Compra inexistente!"));
+    }
+
+    private AcaoModel buscarAcaoPorIdCompra(long idCompra){
+        return acaoRepository.findByIdCompra(idCompra)
+                .orElseThrow(() -> new RequestException("Ação inexistente!"));
     }
 }

@@ -124,6 +124,7 @@ public class CartaoService {
             diaAtual,
             mesAtual,
             lancarCompraNoCartaoRequest.getCategoria(),
+            lancarCompraNoCartaoRequest.getIndiceIcon(),
             lancarCompraNoCartaoRequest.getValor() / numeroParcelas,
             false,
             idCompra
@@ -135,22 +136,23 @@ public class CartaoService {
             );
         }
 
-        if (diaAtual == cartao.getDiaFechamento()) {
-            throw new RequestException(
-                "Compras no dia do fechamento não são consideradas."
-            );
-        }
-
         YearMonth mesCalendarioAtual =  YearMonth.of(anoAtual, mesAtual);
 
         // Determina a fatura da primeira parcela
         YearMonth primeiraFatura;
 
-        if (diaAtual < cartao.getDiaFechamento()) {
+        if(diaAtual == cartao.getDiaFechamento() && lancarCompraNoCartaoRequest.getFaturaReferente().equals("atual")){
             primeiraFatura = mesCalendarioAtual.minusMonths(1);
-        } else {
+        }//Compra no dia do fechamento caso o usuário escolheu que caiu na fatura atual
+        else if(diaAtual == cartao.getDiaFechamento() && lancarCompraNoCartaoRequest.getFaturaReferente().equals("proxima")){
             primeiraFatura = mesCalendarioAtual;
-        }
+        }//Compra no dia do fechamento caso o usuário escolheu que caiu na próxima fatura
+        else if (diaAtual < cartao.getDiaFechamento()) {
+            primeiraFatura = mesCalendarioAtual.minusMonths(1);
+        }//Compra antes do dia do fechamento
+        else {
+            primeiraFatura = mesCalendarioAtual;
+        }//Compra após o dia do fechamento
 
         // Cria cada parcela no seu respectivo período
         for (int i = 0; i < numeroParcelas; i++) {
@@ -163,6 +165,7 @@ public class CartaoService {
                 compra.getDia(),
                 compra.getMes(),
                 compra.getDescricao().concat(indicadorParcelas),
+                compra.getIndiceIcon(),
                 (lancarCompraNoCartaoRequest.getValor() / numeroParcelas),
                 false,
                 idCompra

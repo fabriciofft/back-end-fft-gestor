@@ -24,6 +24,7 @@ public class CompraModel {
     private Integer mes;
     @Column(length = 20)
     private String descricao;
+    private Integer indiceIcon;
     private Double valor;
     private Boolean quitado;
     private Long idCompra;

@@ -19,4 +19,7 @@ public interface CompraRepository extends JpaRepository<CompraModel, Long> {
 
     @Query(value = "Select cp from Compra cp where cp.idCompra = :idCompra")
     List<CompraModel> listarParcelasPeloIdDeCompra(Long idCompra);
+
+    @Query(value = "select cp from Periodo p inner join p.compras cp where p.codigo = :codigoPeriodo order by cp.mes, cp.dia")
+    List<CompraModel> listarComprasDeUmPeriodoPorOrdemDeData(Long codigoPeriodo);
 }

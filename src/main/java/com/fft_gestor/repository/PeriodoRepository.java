@@ -37,6 +37,6 @@ public interface PeriodoRepository extends JpaRepository<PeriodoModel,Long> {
     @Query(value = "select p from Periodo p inner join p.compras cp where cp.codigo = :codigoCompra")
     Optional<PeriodoModel> buscarPeriodoPorCodigoDeCompra(Long codigoCompra);
 
-    @Query(value = "select sum(cp.valor) from Periodo p inner join p.compras cp where p.codigo = :codigo and cp.quitado = false")
+    @Query(value = "select COALESCE(SUM(cp.valor), 0) from Periodo p inner join p.compras cp where p.codigo = :codigo and cp.quitado = false")
     Double buscarValorDeComprasPendentesDeUmPeriodo(Long codigo);
 }

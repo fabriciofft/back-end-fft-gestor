@@ -59,9 +59,13 @@ public class AcaoService {
                     cartao.getCodigo(),
                     dia.getData(),
                     adicionarAcaoRequestDTO.getCategoria(),
+                    adicionarAcaoRequestDTO.getIndiceIcon(),
+                    adicionarAcaoRequestDTO.getFaturaReferente(),
                     adicionarAcaoRequestDTO.getNumeroParcelas(),
                     adicionarAcaoRequestDTO.getValor()
                 );
+
+                idCompra =  cartaoService.lancarCompraNoCartao(lancarCompraNoCartaoRequest);
 
                 if(metricasUsoCartaoRepository.buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo()).isEmpty()){
                     dia.getHistoricoUsoCartoes().add(
@@ -69,42 +73,21 @@ public class AcaoService {
                             null,
                             cartao.getCodigo(),
                             cartao.getApelido(),
-                            cartao.getLimiteUtilizado(),
-                            (cartao.getLimiteUtilizado() + lancarCompraNoCartaoRequest.getValor()),
+                            cartao.getLimiteUtilizado() - lancarCompraNoCartaoRequest.getValor(),
+                            (cartao.getLimiteUtilizado()),
                             cartao.getLimiteTotal()
                         )
                     );
                 }
                 else{
                     MetricasUsoCartaoModel metricasUsoCartao = metricasUsoCartaoRepository.buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo()).get();
-                    metricasUsoCartao.setLimiteUsadoAtual(metricasUsoCartao.getLimiteUsadoAtual() + lancarCompraNoCartaoRequest.getValor());
-                };
 
-                idCompra =  cartaoService.lancarCompraNoCartao(lancarCompraNoCartaoRequest);
+                    metricasUsoCartao.setLimiteUsadoAtual(cartao.getLimiteUtilizado());
+                }
+
                 break;
             }
-            case "quitacaoCartao":{
-                CartaoModel cartao = buscarCartaoPeloCodigo(adicionarAcaoRequestDTO.getCodigoCartao());
-
-                if(metricasUsoCartaoRepository.buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo()).isEmpty()){
-                    dia.getHistoricoUsoCartoes().add(
-                            new MetricasUsoCartaoModel(
-                            null,
-                            cartao.getCodigo(),
-                            cartao.getApelido(),
-                            cartao.getLimiteUtilizado(),
-                            (cartao.getLimiteUtilizado() - adicionarAcaoRequestDTO.getValor()),
-                            cartao.getLimiteTotal()
-                        )
-                    );
-                }
-                else{
-                    MetricasUsoCartaoModel metricasUsoCartao = metricasUsoCartaoRepository.buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo()).get();
-                    metricasUsoCartao.setLimiteUsadoAtual(metricasUsoCartao.getLimiteUsadoAtual() - adicionarAcaoRequestDTO.getValor());
-                };
-
-                acao = buscarAcaoPorIdCompra(adicionarAcaoRequestDTO.getIdCompra());
-                acao.setTipoTransacao("quitacaoCartao");
+            case "quitacaoCartao": {
                 break;
             }
             case "saida":{
@@ -121,21 +104,19 @@ public class AcaoService {
                 throw new RequestException("Tipo de transação inválido!");
         }
 
-        if(!adicionarAcaoRequestDTO.getTipoTransacao().equals("quitacaoCartao")){
-            acao = new AcaoModel(
-                null,
-                adicionarAcaoRequestDTO.getCategoria(),
-                formatarHorario.format(LocalDateTime.now()),
-                adicionarAcaoRequestDTO.getTipoTransacao(),
-                adicionarAcaoRequestDTO.getIndiceIcon(),
-                adicionarAcaoRequestDTO.getValor(),
-                adicionarAcaoRequestDTO.getApelidoCartao(),
-                idCompra,
-                adicionarAcaoRequestDTO.getNumeroParcelas()
-            );
+        acao = new AcaoModel(
+            null,
+            adicionarAcaoRequestDTO.getCategoria(),
+            formatarHorario.format(LocalDateTime.now()),
+            adicionarAcaoRequestDTO.getTipoTransacao(),
+            adicionarAcaoRequestDTO.getIndiceIcon(),
+            adicionarAcaoRequestDTO.getValor(),
+            adicionarAcaoRequestDTO.getApelidoCartao(),
+            idCompra,
+            adicionarAcaoRequestDTO.getNumeroParcelas()
+        );
 
-            dia.getAcoes().add(acao);
-        }
+        dia.getAcoes().add(acao);
 
         usuarioRepository.save(usuario);
         return acao;
@@ -144,10 +125,9 @@ public class AcaoService {
     public DiaModel reverterAcao(Long codigo, Pageable pageable){
         AcaoModel acao = buscarAcaoPeloCodigo(codigo);
 
-        CartaoModel cartao = new CartaoModel();
-
         UsuarioModel usuario = usuarioRepository.buscarUsuarioPorCodigoDeAcao(acao.getCodigo())
             .orElseThrow(() -> new RequestException("Usuário inexistente!"));
+
         DiaModel dia = diaRepository.buscarDiaPorCodigoDeAcao(acao.getCodigo())
             .orElseThrow(() -> new RequestException("Dia inexistente!"));
 
@@ -163,13 +143,17 @@ public class AcaoService {
                 break;
             }
             case "cartaoCredito":{
+               CartaoModel cartao = new CartaoModel();
                List<CompraModel> parcelas = listarParcelasPeloIdDeCompra(acao.getIdCompra());
+
+               Double limiteReduzido = 0.0;
 
                for(CompraModel parcela: parcelas){
                    cartao = buscarCartaoPorCodigoDeCompra(parcela.getCodigo());
                    PeriodoModel periodo = buscarPeriodoPorCodigoDeCompra(parcela.getCodigo());
 
                    cartao.setLimiteUtilizado(cartao.getLimiteUtilizado() - parcela.getValor());
+                   limiteReduzido+=parcela.getValor();
                    periodo.getCompras().remove(parcela);
 
                    if(periodo.getCompras().isEmpty()){
@@ -177,17 +161,20 @@ public class AcaoService {
                    }
                }
 
-                /*MetricasUsoCartaoModel metricasUsoCartao = buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo());
-                metricasUsoCartao.setLimiteUsadoAtual(metricasUsoCartao.getLimiteUsadoAtual() - compra.getValor());
+               if(metricasUsoCartaoRepository.buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo()).isPresent()){
+                   MetricasUsoCartaoModel metrica = metricasUsoCartaoRepository.buscarDataPorCodigoDeCartaoDoHistoricoDeUsoDeCartoes(dia.getCodigo(), cartao.getCodigo()).get();
 
-                if(metricasUsoCartao.getLimiteUsadoAtual().equals(metricasUsoCartao.getLimiteUsadoInicial())){
-                    dia.getHistoricoUsoCartoes().remove(metricasUsoCartao);
-                }*/
+                   metrica.setLimiteUsadoAtual(metrica.getLimiteUsadoAtual() - limiteReduzido);
+
+                   if(metrica.getLimiteUsadoAtual().equals(metrica.getLimiteUsadoInicial())){
+                       dia.getHistoricoUsoCartoes().remove(metrica);
+                   }
+               }
 
                 break;
             }
             default: {
-                throw new RequestException("Não é possível desfazer uma quitação!");
+                throw new RequestException("Não é possível desfazer uma quitação ou ação que já foi quitada!");
             }
         }
 

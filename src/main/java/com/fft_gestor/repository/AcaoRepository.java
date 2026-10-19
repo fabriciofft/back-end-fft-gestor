@@ -45,7 +45,7 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
             MAX(a.indiceIcon),
             SUM(
                 CASE
-                    WHEN a.tipoTransacao  = 'cartaoCredito' OR  a.tipoTransacao  = 'quitacaoCartao' THEN a.valor
+                    WHEN a.tipoTransacao  = 'cartaoCredito' OR  a.tipoTransacao  = 'quitado' THEN a.valor
                     ELSE 0
                 END
             )
@@ -82,7 +82,7 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
         SELECT COALESCE(
             SUM(
                 CASE
-                    WHEN a.tipoTransacao  = 'saida' OR  a.tipoTransacao  = 'cartaoCredito' THEN a.valor
+                    WHEN a.tipoTransacao  = 'saida' OR  a.tipoTransacao  = 'cartaoCredito' OR  a.tipoTransacao  = 'quitado' THEN a.valor
                 ELSE 0
                 END
             )

@@ -13,4 +13,5 @@ public class CartaoResponseDTO {
     private Double limiteTotal;
     private Double limiteUtilizado;
     private String cor;
+    private Integer diaFechamento;
 }

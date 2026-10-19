@@ -16,6 +16,8 @@ public class LancarCompraNoCartaoRequestDTO {
     private Long codigoCartao;
     private LocalDate data;
     private String categoria;
+    private Integer indiceIcon;
+    private String faturaReferente;
     private Integer numeroParcelas;
     private Double valor;
 }

@@ -114,6 +114,7 @@ public class DespesaService {
             "despesa",
             lancarDespesaRequestDTO.getFormaPagamento(),
             0,
+            "atual",
             1,
             despesa.getValor(),
             null

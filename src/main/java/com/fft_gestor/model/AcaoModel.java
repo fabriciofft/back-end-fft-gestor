@@ -17,7 +17,6 @@ public class AcaoModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  Long codigo;
-    @Column(length = 10)
     private String categoria;
     @Column(length = 10)
     private String horario;
