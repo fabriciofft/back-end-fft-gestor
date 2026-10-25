@@ -78,10 +78,13 @@ public class ResumoService {
         for(int i = 0; i <= 6; i++){
             LocalDate dia = hoje.minusDays(i);
 
+            GastoResponseDTO gasto = acaoRepository.gastosEmUmaData(usuario.getCodigo(), dia);
+
             gastosUltimos7Dias.add(
                 new GastoPorDiaResponseDTO(
                     dia,
-                    acaoRepository.gastosEmUmaData(usuario.getCodigo(), dia)
+                    gasto.getGastoTotal(),
+                    gasto.getGastoComDespesas()
                 )
             );
         }

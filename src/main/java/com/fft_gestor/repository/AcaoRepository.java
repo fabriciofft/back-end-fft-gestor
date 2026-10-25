@@ -2,6 +2,7 @@ package com.fft_gestor.repository;
 
 import com.fft_gestor.dto.response.AcaoCategoriaResponseDTO;
 import com.fft_gestor.dto.response.GastoComCategoriaResponseDTO;
+import com.fft_gestor.dto.response.GastoResponseDTO;
 import com.fft_gestor.model.AcaoModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -79,19 +80,33 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
     List<AcaoCategoriaResponseDTO> buscarAcoesPorCategoriaDeumUsuario(Long codigoUsuario, String categoria, LocalDate dataInicio, LocalDate dataFim);
 
     @Query("""
-        SELECT COALESCE(
+        SELECT new com.fft_gestor.dto.response.GastoResponseDTO(
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN a.tipoTransacao  = 'saida' OR  a.tipoTransacao  = 'cartaoCredito' OR  a.tipoTransacao  = 'quitado' THEN a.valor
+                    ELSE 0
+                    END
+                )
+                , 0.0
+            ),
+            COALESCE(
             SUM(
                 CASE
-                    WHEN a.tipoTransacao  = 'saida' OR  a.tipoTransacao  = 'cartaoCredito' OR  a.tipoTransacao  = 'quitado' THEN a.valor
+                    WHEN (a.tipoTransacao  = 'saida' AND a.categoria = 'despesa') OR
+                         (a.tipoTransacao  = 'cartaoCredito' AND a.categoria = 'despesa') OR   
+                         (a.tipoTransacao  = 'quitado' AND a.categoria = 'despesa') THEN a.valor
                 ELSE 0
                 END
             )
             , 0.0
         ) 
+        )
+        SELECT 
         FROM Usuario u 
         INNER JOIN u.dias d 
         INNER JOIN d.acoes a 
         WHERE u.codigo = :codigoUsuario and d.data = :data
     """)
-    Double gastosEmUmaData(Long codigoUsuario, LocalDate data);
+    GastoResponseDTO gastosEmUmaData(Long codigoUsuario, LocalDate data);
 }

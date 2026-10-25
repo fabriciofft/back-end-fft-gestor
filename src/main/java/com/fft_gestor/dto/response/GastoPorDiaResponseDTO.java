@@ -14,5 +14,6 @@ import java.time.LocalDate;
 public class GastoPorDiaResponseDTO {
 
     private LocalDate data;
-    private Double valor;
+    private Double gastoTotal;
+    private Double gastoComDespesas;
 }
