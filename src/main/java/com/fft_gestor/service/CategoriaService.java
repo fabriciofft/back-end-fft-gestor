@@ -27,7 +27,7 @@ public class CategoriaService {
         return usuario.getCategorias();
     }
 
-    public List<CategoriaModel>  salvarCategoria(SalvarCategoriaRequestDTO salvarCategoriaRequestDTO){
+    public CategoriaModel  salvarCategoria(SalvarCategoriaRequestDTO salvarCategoriaRequestDTO){
         UsuarioModel usuario = buscarUsuarioPorCodigo(salvarCategoriaRequestDTO.getCodigoUsuario());
 
         if(usuario.getCategorias().size() >= 25){
@@ -49,7 +49,7 @@ public class CategoriaService {
         usuario.getCategorias().add(categoria);
         usuarioRepository.save(usuario);
 
-        return usuario.getCategorias();
+        return categoria;
     }
 
     public String excluirCategoria(Long codigo){

@@ -76,7 +76,7 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
         WHERE u.codigo = :codigoUsuario
             AND a.categoria = :categoria
             AND d.data BETWEEN :dataInicio AND :dataFim
-        ORDER BY d.data DESC
+        ORDER BY d.data DESC, a.horario DESC
     """)
     List<AcaoCategoriaResponseDTO> buscarAcoesPorCategoriaDeumUsuario(Long codigoUsuario, String categoria, LocalDate dataInicio, LocalDate dataFim);
 
@@ -93,7 +93,8 @@ public interface AcaoRepository extends JpaRepository<AcaoModel, Long> {
         INNER JOIN d.acoes a
         WHERE u.codigo = :codigoUsuario
             AND d.data = :data
-        ORDER BY d.data DESC
+            AND (a.tipoTransacao  = 'saida' OR  a.tipoTransacao  = 'cartaoCredito' OR  a.tipoTransacao  = 'quitado')
+        ORDER BY a.horario DESC
     """)
     List<AcaoDeUmaDataResponseDTO> buscarAcoesDeUmaDataDeumUsuario(Long codigoUsuario, LocalDate data);
 

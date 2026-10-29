@@ -70,7 +70,7 @@ public class CartaoService {
         }
     }
 
-    public UsuarioModel criarCartaoParaUsuario(CriarCartaoRequestDTO criarCartaoRequest){
+    public CartaoComValoresFechadosEFuturosResponseDTO criarCartaoParaUsuario(CriarCartaoRequestDTO criarCartaoRequest){
         UsuarioModel usuario = buscarUsuarioPorCodigo(criarCartaoRequest.getCodigoUsuario());
 
         if(cartaoRepository.buscarCartaoDeUmUsuarioPeloApelido(usuario.getCodigo(), criarCartaoRequest.getApelido().toUpperCase()).isPresent()){
@@ -102,7 +102,19 @@ public class CartaoService {
 
         usuario.getCartoes().add(cartao);
         usuarioRepository.save(usuario);
-        return  usuario;
+
+        return new CartaoComValoresFechadosEFuturosResponseDTO(
+            cartao.getCodigo(),
+            cartao.getApelido(),
+            cartao.getUltimosDigitos(),
+            cartao.getLimiteTotal(),
+            cartao.getLimiteUtilizado(),
+            cartao.getCor(),
+            cartao.getDiaFechamento(),
+            0.0,
+            0.0,
+            0.0
+        );
     }
 
     public Long lancarCompraNoCartao(LancarCompraNoCartaoRequestDTO lancarCompraNoCartaoRequest){
@@ -262,16 +274,12 @@ public class CartaoService {
                 if (periodo.getMes().equals(mesDaFatura.getMonthValue())
                     && periodo.getAno().equals(mesDaFatura.getYear())
                 ) {
-                    for(CompraModel compra: periodo.getCompras()){
-                        limiteAtualUtilizado += compra.getValor();
-                    }
+                    limiteAtualUtilizado += periodoRepository.buscarValorDeComprasPendentesDeUmPeriodo(periodo.getCodigo());
                 }
                 else if(periodo.getMes() < mesDaFatura.getMonthValue()
                     && periodo.getAno() <= (mesDaFatura.getYear())
                 ){
-                    for(CompraModel compra: periodo.getCompras()){
-                        limiteFechadoUtilizado += compra.getValor();
-                    }
+                    limiteFechadoUtilizado += periodoRepository.buscarValorDeComprasPendentesDeUmPeriodo(periodo.getCodigo());
                 }
 
             }
