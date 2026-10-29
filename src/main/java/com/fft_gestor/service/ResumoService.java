@@ -1,6 +1,7 @@
 package com.fft_gestor.service;
 
 import com.fft_gestor.dto.request.BuscarAcoesPorCategoriaRequestDTO;
+import com.fft_gestor.dto.request.BuscarAcoesPorDataRequestDTO;
 import com.fft_gestor.dto.response.*;
 import com.fft_gestor.exception.RequestException;
 import com.fft_gestor.model.CartaoModel;
@@ -56,11 +57,19 @@ public class ResumoService {
         );
     }
 
+    public List<AcaoDeUmaDataResponseDTO> buscarAcoesDeUmaDataDeUmUsuario(BuscarAcoesPorDataRequestDTO buscarAcoesPorDataRequest){
+        UsuarioModel usuario = buscarUsuarioPorCodigo(buscarAcoesPorDataRequest.getCodigoUsuario());
+
+        return acaoRepository.buscarAcoesDeUmaDataDeumUsuario(usuario.getCodigo(), buscarAcoesPorDataRequest.getData());
+    }
+
     public List<AcaoCategoriaResponseDTO> buscarAcoesPorCategoriaDeumUsuario(BuscarAcoesPorCategoriaRequestDTO buscarAcoesPorCategoriaRequestDTO){
+        UsuarioModel usuario = buscarUsuarioPorCodigo(buscarAcoesPorCategoriaRequestDTO.getCodigoUsuario());
+
         LocalDate hoje = LocalDate.now();
         LocalDate inicio = hoje.minusDays((buscarAcoesPorCategoriaRequestDTO.getPeriodo().equals("semana")) ? 6 : 29);
 
-        return acaoRepository.buscarAcoesPorCategoriaDeumUsuario(buscarAcoesPorCategoriaRequestDTO.getCodigoUsuario(), buscarAcoesPorCategoriaRequestDTO.getCategoria(), inicio, hoje);
+        return acaoRepository.buscarAcoesPorCategoriaDeumUsuario(usuario.getCodigo(), buscarAcoesPorCategoriaRequestDTO.getCategoria(), inicio, hoje);
     }
 
     //Métodos privados

@@ -31,6 +31,11 @@ public class CartaoController {
         return new ResponseEntity<>(converterEmListaDeCartaoResponseDTO(cartaoService.listarCartoesDeUmUsuario(codigoUsuario)), HttpStatus.OK);
     }
 
+    @GetMapping(path = "/cartoesDeUmUsuario/limitesFechadosEFuturos/{codigoUsuario}")
+    public ResponseEntity<?> listarCartoesDeUmUsuarioComLimitesFechadosEFuturos(@PathVariable Long codigoUsuario){
+        return new ResponseEntity<>(cartaoService.listarCartoesDeUmUsuarioComLimitesFechadosEFuturos(codigoUsuario), HttpStatus.OK);
+    }
+
     @GetMapping(path = "/{codigo}")
     public ResponseEntity<?> buscarCartaoPorCodigo(@PathVariable Long codigo){
         return new ResponseEntity<>(cartaoService.buscarCartaoPorCodigo(codigo), HttpStatus.OK);

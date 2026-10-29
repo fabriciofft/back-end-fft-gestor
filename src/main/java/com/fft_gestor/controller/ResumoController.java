@@ -1,6 +1,7 @@
 package com.fft_gestor.controller;
 
 import com.fft_gestor.dto.request.BuscarAcoesPorCategoriaRequestDTO;
+import com.fft_gestor.dto.request.BuscarAcoesPorDataRequestDTO;
 import com.fft_gestor.service.ResumoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,11 @@ public class ResumoController {
     @GetMapping(path = "/{codigoUsuario}")
     public ResponseEntity<?> buscarGastosPorCategoriaDeUmUsuario(@PathVariable Long codigoUsuario){
         return new ResponseEntity<>(resumoService.buscarGastosPorCategoriaDeUmUsuario(codigoUsuario), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/acoesDeUmaData")
+    public ResponseEntity<?> buscarAcoesDeUmaDataDeUmUsuario(@RequestBody BuscarAcoesPorDataRequestDTO buscarAcoesPorCategoriaRequestDTO){
+        return new ResponseEntity<>(resumoService.buscarAcoesDeUmaDataDeUmUsuario(buscarAcoesPorCategoriaRequestDTO), HttpStatus.OK);
     }
 
     @PostMapping(path = "/acoesPorCategoria")

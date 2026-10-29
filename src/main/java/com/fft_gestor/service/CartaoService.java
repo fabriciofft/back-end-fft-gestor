@@ -3,6 +3,8 @@ package com.fft_gestor.service;
 import com.fft_gestor.dto.request.AlterarLimiteCartaoRequestDTO;
 import com.fft_gestor.dto.request.CriarCartaoRequestDTO;
 import com.fft_gestor.dto.request.LancarCompraNoCartaoRequestDTO;
+import com.fft_gestor.dto.response.CartaoComValoresFechadosEFuturosResponseDTO;
+import com.fft_gestor.dto.response.PeriodosSeparadosResponseDTO;
 import com.fft_gestor.exception.RequestException;
 import com.fft_gestor.model.CartaoModel;
 import com.fft_gestor.model.CompraModel;
@@ -44,6 +46,11 @@ public class CartaoService {
     public List<CartaoModel> listarCartoesDeUmUsuario(Long codigoUsuario){
         UsuarioModel usuario = buscarUsuarioPorCodigo(codigoUsuario);
         return usuario.getCartoes();
+    }
+
+    public List<CartaoComValoresFechadosEFuturosResponseDTO> listarCartoesDeUmUsuarioComLimitesFechadosEFuturos(Long codigoUsuario){
+        UsuarioModel usuario = buscarUsuarioPorCodigo(codigoUsuario);
+        return calcularValoresFechadosEFuturos(usuario.getCartoes());
     }
 
     public CartaoModel buscarCartaoPorCodigo(Long codigo){
@@ -218,6 +225,69 @@ public class CartaoService {
     private UsuarioModel buscarUsuarioPorCodigo(Long codigo){
         return usuarioRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RequestException("Usuário inexistente!"));
+    }
+
+    private List<CartaoComValoresFechadosEFuturosResponseDTO> calcularValoresFechadosEFuturos(List<CartaoModel> cartoes){
+        List<CartaoComValoresFechadosEFuturosResponseDTO> cartoesComValoresFechadosEFuturos = new ArrayList<>();
+        YearMonth mesAtual = YearMonth.now();
+        int diaAtual = LocalDate.now().getDayOfMonth();
+
+        for (CartaoModel cartao: cartoes) {
+            Double limiteAtualUtilizado = 0.0;
+            Double limiteFechadoUtilizado = 0.0;
+
+            CartaoComValoresFechadosEFuturosResponseDTO cartaoComValoresFechadosEFuturos = new CartaoComValoresFechadosEFuturosResponseDTO(
+                cartao.getCodigo(),
+                cartao.getApelido(),
+                cartao.getUltimosDigitos(),
+                cartao.getLimiteTotal(),
+                cartao.getLimiteUtilizado(),
+                cartao.getCor(),
+                cartao.getDiaFechamento(),
+                0.0,
+                0.0,
+                0.0
+            );
+
+            YearMonth mesDaFatura;
+
+            if (diaAtual < cartao.getDiaFechamento()) {
+                mesDaFatura = mesAtual.minusMonths(1);
+            } else {
+                mesDaFatura = mesAtual;
+            }
+
+            for (PeriodoModel periodo : cartao.getPeriodos()) {
+
+                if (periodo.getMes().equals(mesDaFatura.getMonthValue())
+                    && periodo.getAno().equals(mesDaFatura.getYear())
+                ) {
+                    for(CompraModel compra: periodo.getCompras()){
+                        limiteAtualUtilizado += compra.getValor();
+                    }
+                }
+                else if(periodo.getMes() < mesDaFatura.getMonthValue()
+                    && periodo.getAno() <= (mesDaFatura.getYear())
+                ){
+                    for(CompraModel compra: periodo.getCompras()){
+                        limiteFechadoUtilizado += compra.getValor();
+                    }
+                }
+
+            }
+
+            cartaoComValoresFechadosEFuturos.setLimiteFechadoUtilizado(limiteFechadoUtilizado);
+            cartaoComValoresFechadosEFuturos.setLimiteAtualUtilizado(limiteAtualUtilizado);
+            cartaoComValoresFechadosEFuturos.setLimiteFuturoUtilizado(
+                cartao.getLimiteUtilizado() - limiteFechadoUtilizado - limiteAtualUtilizado
+            );
+
+            cartoesComValoresFechadosEFuturos.add(
+                cartaoComValoresFechadosEFuturos
+            );
+        }
+
+        return cartoesComValoresFechadosEFuturos;
     }
 
 
